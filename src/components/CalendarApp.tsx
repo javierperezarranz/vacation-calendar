@@ -1,0 +1,94 @@
+"use client";
+
+import { useState, useEffect } from "react";
+import { Holiday, HolidayType } from "@/lib/types";
+import { formatDate } from "@/lib/date-utils";
+import { useHolidays } from "@/hooks/useHolidays";
+import YearNavigation from "./YearNavigation";
+import UserSelector from "./UserSelector";
+import PtoCounter from "./PtoCounter";
+import HolidayLegend from "./HolidayLegend";
+import YearlyCalendar from "./YearlyCalendar";
+import AddEventModal from "./AddEventModal";
+
+export default function CalendarApp() {
+  const now = new Date();
+  const todayStr = formatDate(now.getFullYear(), now.getMonth(), now.getDate());
+
+  const [year, setYear] = useState(now.getFullYear());
+  const [users, setUsers] = useState<string[]>(() => {
+    if (typeof window === "undefined") return [];
+    try {
+      const stored = localStorage.getItem("vacation-calendar-users");
+      return stored ? JSON.parse(stored) : [];
+    } catch {
+      return [];
+    }
+  });
+
+  useEffect(() => {
+    localStorage.setItem("vacation-calendar-users", JSON.stringify(users));
+  }, [users]);
+  const [modalState, setModalState] = useState<{
+    dateStr: string;
+    holidays: Holiday[];
+  } | null>(null);
+
+  const { holidayMap, ptoCounts, loading, addHoliday, removeHoliday } =
+    useHolidays(year);
+
+  const handleDayClick = (dateStr: string, holidays: Holiday[]) => {
+    setModalState({ dateStr, holidays });
+  };
+
+  const handleAdd = async (
+    dates: string[],
+    name: string,
+    type: HolidayType,
+    userNames: string[]
+  ) => {
+    await addHoliday({ dates, name, type, user_names: userNames });
+  };
+
+  const handleDelete = async (id: number) => {
+    await removeHoliday(id);
+  };
+
+  return (
+    <div className="max-w-7xl mx-auto px-4 py-6">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+        <YearNavigation year={year} onYearChange={setYear} />
+        <div className="flex flex-col sm:flex-row sm:items-center gap-3">
+          <UserSelector users={users} onUsersChange={setUsers} />
+          <PtoCounter users={users} ptoCounts={ptoCounts} />
+        </div>
+      </div>
+
+      <div className="mb-4">
+        <HolidayLegend />
+      </div>
+
+      {loading ? (
+        <div className="text-center text-gray-400 py-12">Loading...</div>
+      ) : (
+        <YearlyCalendar
+          year={year}
+          holidayMap={holidayMap}
+          today={todayStr}
+          onDayClick={handleDayClick}
+        />
+      )}
+
+      {modalState && (
+        <AddEventModal
+          dateStr={modalState.dateStr}
+          existingHolidays={modalState.holidays}
+          users={users}
+          onAdd={handleAdd}
+          onDelete={handleDelete}
+          onClose={() => setModalState(null)}
+        />
+      )}
+    </div>
+  );
+}
