@@ -21,6 +21,15 @@ export interface CreateHolidayRequest {
   user_names: string[];
 }
 
+export interface UpdateHolidayGroupRequest {
+  year: number;
+  oldName: string;
+  oldType: HolidayType;
+  userName: string | null;
+  newName: string;
+  newType: HolidayType;
+}
+
 export type HolidayMap = Record<string, Holiday[]>;
 
 export interface HolidaysResponse {

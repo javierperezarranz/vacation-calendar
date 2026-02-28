@@ -77,6 +77,62 @@ export function deleteHoliday(id: number): boolean {
   return result.changes > 0;
 }
 
+export function updateHolidayGroup(
+  year: number,
+  oldName: string,
+  oldType: string,
+  userName: string | null,
+  newName: string,
+  newType: string
+): number {
+  const db = getDb();
+  const startDate = `${year}-01-01`;
+  const endDate = `${year}-12-31`;
+
+  const result = userName
+    ? db
+        .prepare(
+          `UPDATE holidays SET name = ?, type = ?
+           WHERE date >= ? AND date <= ? AND name = ? AND type = ? AND user_name = ?`
+        )
+        .run(newName, newType, startDate, endDate, oldName, oldType, userName)
+    : db
+        .prepare(
+          `UPDATE holidays SET name = ?, type = ?
+           WHERE date >= ? AND date <= ? AND name = ? AND type = ? AND user_name IS NULL`
+        )
+        .run(newName, newType, startDate, endDate, oldName, oldType);
+
+  return result.changes;
+}
+
+export function deleteHolidayGroup(
+  year: number,
+  name: string,
+  type: string,
+  userName: string | null
+): number {
+  const db = getDb();
+  const startDate = `${year}-01-01`;
+  const endDate = `${year}-12-31`;
+
+  const result = userName
+    ? db
+        .prepare(
+          `DELETE FROM holidays
+           WHERE date >= ? AND date <= ? AND name = ? AND type = ? AND user_name = ?`
+        )
+        .run(startDate, endDate, name, type, userName)
+    : db
+        .prepare(
+          `DELETE FROM holidays
+           WHERE date >= ? AND date <= ? AND name = ? AND type = ? AND user_name IS NULL`
+        )
+        .run(startDate, endDate, name, type);
+
+  return result.changes;
+}
+
 export function getUsers(): User[] {
   const db = getDb();
   return db.prepare("SELECT * FROM users ORDER BY name").all() as User[];
