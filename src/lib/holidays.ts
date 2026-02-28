@@ -24,7 +24,7 @@ export function getPtoCountsForYear(
        WHERE date >= ? AND date <= ? AND type = 'pto' AND user_name IS NOT NULL
          AND strftime('%w', date) NOT IN ('0', '6')
          AND date NOT IN (
-           SELECT date FROM holidays WHERE date >= ? AND date <= ? AND type = 'national'
+           SELECT date FROM holidays WHERE date >= ? AND date <= ? AND type IN ('national', 'company')
          )
        GROUP BY user_name`
     )

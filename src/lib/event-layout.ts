@@ -9,7 +9,7 @@ import {
   MonthLayout,
 } from "./types";
 
-export const MAX_VISIBLE_SLOTS = 3;
+export const MAX_VISIBLE_SLOTS = 50;
 
 /**
  * Stage 1: Group non-national holidays into spans of consecutive days
@@ -120,29 +120,107 @@ function splitIntoSegments(
     }
   }
 
-  // Stage 3: Assign vertical slots using greedy interval scheduling
-  const result: EventSegment[][] = segmentsByWeek.map((weekSegs) => {
-    // Sort by colSpan descending (longer gets priority for lower slots), then startCol
-    const sorted = [...weekSegs].sort((a, b) => {
-      if (b.colSpan !== a.colSpan) return b.colSpan - a.colSpan;
-      return a.startCol - b.startCol;
+  // Stage 3: Assign vertical slots with event grouping and cross-week consistency.
+  // Segments of the same event within a week reserve the full column range
+  // (min startCol to max endCol) so other events can't squeeze in between.
+  // Continuing events preserve their row slot from the previous week.
+  const result: EventSegment[][] = [];
+  let prevWeekSlots = new Map<string, number>();
+
+  for (let w = 0; w < segmentsByWeek.length; w++) {
+    const weekSegs = segmentsByWeek[w];
+
+    // Group segments by event identity (name|type|userName)
+    const eventGroups = new Map<
+      string,
+      Omit<EventSegment, "rowSlot">[]
+    >();
+    for (const seg of weekSegs) {
+      const key = `${seg.name}|${seg.type}|${seg.userName ?? ""}`;
+      if (!eventGroups.has(key)) {
+        eventGroups.set(key, []);
+      }
+      eventGroups.get(key)!.push(seg);
+    }
+
+    // Compute effective column range for each event group
+    const groupEntries: {
+      key: string;
+      segments: Omit<EventSegment, "rowSlot">[];
+      minCol: number;
+      maxCol: number;
+      totalSpan: number;
+      isContinuation: boolean;
+    }[] = [];
+
+    for (const [key, segs] of eventGroups) {
+      const minCol = Math.min(...segs.map((s) => s.startCol));
+      const maxCol = Math.max(...segs.map((s) => s.startCol + s.colSpan - 1));
+      const totalSpan = maxCol - minCol + 1;
+      const isContinuation = segs.some((s) => !s.isStart);
+      groupEntries.push({
+        key,
+        segments: segs,
+        minCol,
+        maxCol,
+        totalSpan,
+        isContinuation,
+      });
+    }
+
+    // Sort: longer effective ranges first, then by minCol
+    groupEntries.sort((a, b) => {
+      if (b.totalSpan !== a.totalSpan) return b.totalSpan - a.totalSpan;
+      return a.minCol - b.minCol;
     });
 
-    const assigned: EventSegment[] = [];
-    // Track which slot each column is occupied up to
-    // slotOccupancy[col] = set of occupied slot indices
-    const colSlots: Set<number>[] = Array.from({ length: 7 }, () => new Set());
+    // Assign continuations first (preserve slot from previous week), then new events
+    const continuations = groupEntries.filter(
+      (g) => g.isContinuation && prevWeekSlots.has(g.key)
+    );
+    const newGroups = groupEntries.filter(
+      (g) => !g.isContinuation || !prevWeekSlots.has(g.key)
+    );
 
-    for (const seg of sorted) {
-      // Find the lowest slot that is free for all columns in this segment's range
-      let slot = 0;
+    const assigned: EventSegment[] = [];
+    const colSlots: Set<number>[] = Array.from(
+      { length: 7 },
+      () => new Set()
+    );
+    const currentWeekSlots = new Map<string, number>();
+
+    const assignGroup = (
+      group: (typeof groupEntries)[0],
+      preferredSlot?: number
+    ) => {
+      let slot = preferredSlot ?? 0;
+      if (preferredSlot != null) {
+        // Check if preferred slot is available for the effective range
+        let canUse = true;
+        for (let c = group.minCol; c <= group.maxCol; c++) {
+          if (colSlots[c].has(preferredSlot)) {
+            canUse = false;
+            break;
+          }
+        }
+        if (!canUse) slot = 0; // fall through to search
+        else {
+          // Reserve and assign
+          for (let c = group.minCol; c <= group.maxCol; c++) {
+            colSlots[c].add(slot);
+          }
+          for (const seg of group.segments) {
+            assigned.push({ ...seg, rowSlot: slot });
+          }
+          currentWeekSlots.set(group.key, slot);
+          return;
+        }
+      }
+
+      // Find lowest free slot for the effective range
       while (true) {
         let free = true;
-        for (
-          let c = seg.startCol;
-          c < seg.startCol + seg.colSpan;
-          c++
-        ) {
+        for (let c = group.minCol; c <= group.maxCol; c++) {
           if (colSlots[c].has(slot)) {
             free = false;
             break;
@@ -152,16 +230,57 @@ function splitIntoSegments(
         slot++;
       }
 
-      // Mark columns as occupied at this slot
-      for (let c = seg.startCol; c < seg.startCol + seg.colSpan; c++) {
+      for (let c = group.minCol; c <= group.maxCol; c++) {
         colSlots[c].add(slot);
       }
+      for (const seg of group.segments) {
+        assigned.push({ ...seg, rowSlot: slot });
+      }
+      currentWeekSlots.set(group.key, slot);
+    };
 
-      assigned.push({ ...seg, rowSlot: slot });
+    for (const group of continuations) {
+      assignGroup(group, prevWeekSlots.get(group.key));
+    }
+    for (const group of newGroups) {
+      assignGroup(group);
     }
 
-    return assigned;
-  });
+    // Merge segments of the same event in the same row slot into one
+    // continuous bar so split spans don't appear visually disconnected.
+    const mergeMap = new Map<string, EventSegment[]>();
+    for (const seg of assigned) {
+      const mk = `${seg.name}|${seg.type}|${seg.userName ?? ""}|${seg.rowSlot}`;
+      if (!mergeMap.has(mk)) mergeMap.set(mk, []);
+      mergeMap.get(mk)!.push(seg);
+    }
+
+    const merged: EventSegment[] = [];
+    for (const segs of mergeMap.values()) {
+      if (segs.length === 1) {
+        merged.push(segs[0]);
+      } else {
+        const minCol = Math.min(...segs.map((s) => s.startCol));
+        const maxCol = Math.max(
+          ...segs.map((s) => s.startCol + s.colSpan - 1)
+        );
+        const leftmost = segs.find((s) => s.startCol === minCol)!;
+        const rightmost = segs.find(
+          (s) => s.startCol + s.colSpan - 1 === maxCol
+        )!;
+        merged.push({
+          ...leftmost,
+          startCol: minCol,
+          colSpan: maxCol - minCol + 1,
+          isStart: leftmost.isStart,
+          isEnd: rightmost.isEnd,
+        });
+      }
+    }
+
+    result.push(merged);
+    prevWeekSlots = currentWeekSlots;
+  }
 
   return { segments: result, weekCount };
 }

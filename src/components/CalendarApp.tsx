@@ -8,7 +8,6 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { Spinner } from "@/components/ui/spinner";
 import YearNavigation from "./YearNavigation";
 import UserSelector from "./UserSelector";
-import PtoCounter from "./PtoCounter";
 import HolidayLegend from "./HolidayLegend";
 import YearlyCalendar from "./YearlyCalendar";
 import AddEventModal from "./AddEventModal";
@@ -76,14 +75,11 @@ export default function CalendarApp() {
   };
 
   return (
-    <TooltipProvider>
+    <TooltipProvider delayDuration={0}>
       <div className="max-w-7xl mx-auto px-4 py-6">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
           <YearNavigation year={year} onYearChange={setYear} />
-          <div className="flex flex-col sm:flex-row sm:items-center gap-3">
-            <UserSelector users={users} onUsersChange={setUsers} />
-            <PtoCounter users={users} ptoCounts={ptoCounts} />
-          </div>
+          <UserSelector users={users} onUsersChange={setUsers} ptoCounts={ptoCounts} />
         </div>
 
         <div className="mb-4">

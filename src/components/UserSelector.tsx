@@ -1,21 +1,22 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { X } from "lucide-react";
+import { X, UserPlus } from "lucide-react";
 import { User } from "@/lib/types";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Label } from "@/components/ui/label";
 
 interface UserSelectorProps {
   users: string[];
   onUsersChange: (users: string[]) => void;
+  ptoCounts: Record<string, number>;
 }
 
 export default function UserSelector({
   users,
   onUsersChange,
+  ptoCounts,
 }: UserSelectorProps) {
   const [knownUsers, setKnownUsers] = useState<User[]>([]);
   const [input, setInput] = useState("");
@@ -55,11 +56,28 @@ export default function UserSelector({
   );
 
   return (
-    <div className="flex flex-col gap-2">
-      <div className="flex items-center gap-2">
-        <Label htmlFor="user-name" className="text-gray-600">
-          Users:
-        </Label>
+    <div className="flex items-center gap-2 flex-wrap">
+      {users.map((name) => (
+        <Badge
+          key={name}
+          variant="secondary"
+          className="gap-1.5 py-1 pl-2.5 pr-1.5"
+        >
+          <span>{name}</span>
+          <span className="font-bold text-success-700 tabular-nums">
+            {ptoCounts[name] || 0} PTO
+          </span>
+          <button
+            type="button"
+            onClick={() => removeUser(name)}
+            className="ml-0.5 rounded-full p-0.5 text-muted-foreground hover:bg-gray-200 hover:text-foreground cursor-pointer transition-colors"
+            aria-label={`Remove ${name}`}
+          >
+            <X className="size-3" />
+          </button>
+        </Badge>
+      ))}
+      <div className="flex items-center gap-1.5">
         <Input
           id="user-name"
           type="text"
@@ -67,16 +85,19 @@ export default function UserSelector({
           value={input}
           onChange={(e) => setInput(e.target.value)}
           onKeyDown={handleKeyDown}
-          placeholder="Enter a name"
-          className="h-8 w-auto"
+          placeholder="Add person…"
+          className="h-7 w-32 text-sm"
         />
         <Button
           type="button"
-          size="sm"
+          variant="ghost"
+          size="icon"
+          className="size-7"
           onClick={addUser}
           disabled={!input.trim()}
+          aria-label="Add user"
         >
-          Add
+          <UserPlus className="size-3.5" />
         </Button>
         <datalist id="user-list">
           {suggestions.map((u) => (
@@ -84,27 +105,6 @@ export default function UserSelector({
           ))}
         </datalist>
       </div>
-      {users.length > 0 && (
-        <div className="flex flex-wrap gap-1.5">
-          {users.map((name) => (
-            <Badge
-              key={name}
-              variant="secondary"
-              className="gap-1"
-            >
-              {name}
-              <button
-                type="button"
-                onClick={() => removeUser(name)}
-                className="text-muted-foreground hover:text-foreground cursor-pointer leading-none"
-                aria-label={`Remove ${name}`}
-              >
-                <X className="size-3" />
-              </button>
-            </Badge>
-          ))}
-        </div>
-      )}
     </div>
   );
 }
