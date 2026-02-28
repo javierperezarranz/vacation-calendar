@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback, useMemo } from "react";
-import { Holiday, HolidayMap, HolidaysResponse, CreateHolidayRequest } from "@/lib/types";
+import { Holiday, HolidayMap, HolidaysResponse, CreateHolidayRequest, UpdateHolidayGroupRequest } from "@/lib/types";
 
 export function useHolidays(year: number) {
   const [holidays, setHolidays] = useState<Holiday[]>([]);
@@ -58,5 +58,29 @@ export function useHolidays(year: number) {
     [fetchHolidays]
   );
 
-  return { holidays, holidayMap, ptoCounts, loading, addHoliday, removeHoliday };
+  const updateHolidayGroup = useCallback(
+    async (req: UpdateHolidayGroupRequest) => {
+      const res = await fetch("/api/holidays", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(req),
+      });
+      if (!res.ok) throw new Error("Failed to update holidays");
+      await fetchHolidays();
+    },
+    [fetchHolidays]
+  );
+
+  const removeHolidayGroup = useCallback(
+    async (name: string, type: string, userName: string | null) => {
+      const params = new URLSearchParams({ year: String(year), name, type });
+      if (userName) params.set("user_name", userName);
+      const res = await fetch(`/api/holidays?${params}`, { method: "DELETE" });
+      if (!res.ok) throw new Error("Failed to delete holiday group");
+      await fetchHolidays();
+    },
+    [year, fetchHolidays]
+  );
+
+  return { holidays, holidayMap, ptoCounts, loading, addHoliday, removeHoliday, updateHolidayGroup, removeHolidayGroup };
 }

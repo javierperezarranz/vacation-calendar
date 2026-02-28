@@ -1,12 +1,17 @@
 "use client";
 
 import { EventSegment, HolidayType } from "@/lib/types";
+import {
+  Tooltip,
+  TooltipTrigger,
+  TooltipContent,
+} from "@/components/ui/tooltip";
 
 const TYPE_COLORS: Record<HolidayType, string> = {
   national: "bg-gray-400",
-  company: "bg-blue-400 text-white",
-  pto: "bg-green-400 text-white",
-  event: "bg-purple-400 text-white",
+  company: "bg-brand-400 text-white",
+  pto: "bg-success-400 text-white",
+  event: "bg-warning-400 text-white",
 };
 
 const DAY_HEADER_HEIGHT = 32; // px - space for day number + national holiday label
@@ -15,9 +20,10 @@ const SLOT_GAP = 2; // px gap between slots
 
 interface EventBarProps {
   segment: EventSegment;
+  onEventClick?: (name: string, type: HolidayType, userName: string | null) => void;
 }
 
-export default function EventBar({ segment }: EventBarProps) {
+export default function EventBar({ segment, onEventClick }: EventBarProps) {
   const left = `${segment.startCol * (100 / 7)}%`;
   const width = `${segment.colSpan * (100 / 7)}%`;
   const top = DAY_HEADER_HEIGHT + segment.rowSlot * (SLOT_HEIGHT + SLOT_GAP);
@@ -34,18 +40,21 @@ export default function EventBar({ segment }: EventBarProps) {
       ? `${segment.name} (${segment.userName})`
       : segment.name;
 
-  return (
+  const handleClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    onEventClick?.(segment.name, segment.type, segment.userName);
+  };
+
+  const bar = (
     <div
-      className={`group/bar absolute overflow-hidden text-[10px] leading-[16px] font-medium truncate px-1 ${colorClass} ${rounding}`}
+      className={`absolute z-[5] hover:z-20 text-[10px] leading-[16px] font-medium px-1 cursor-pointer ${colorClass} ${rounding} hover:brightness-110`}
       style={{
         left,
         width,
         top: `${top}px`,
         height: `${SLOT_HEIGHT}px`,
-        // Slight horizontal margin for visual polish on start/end
         marginLeft: segment.isStart ? "2px" : "0",
         marginRight: segment.isEnd ? "2px" : "0",
-        // Adjust width to account for margins
         ...(segment.isStart || segment.isEnd
           ? {
               width: `calc(${segment.colSpan * (100 / 7)}% - ${
@@ -53,16 +62,22 @@ export default function EventBar({ segment }: EventBarProps) {
               }px)`,
             }
           : {}),
-        zIndex: 1,
       }}
+      onClick={handleClick}
     >
-      {label}
-      <div className="pointer-events-none absolute left-1/2 -translate-x-1/2 bottom-full mb-1 hidden group-hover/bar:block z-50">
-        <div className="whitespace-nowrap rounded bg-gray-900 px-2 py-1 text-[11px] text-white shadow-lg">
-          {label}
-        </div>
-      </div>
+      <span className="block truncate">{label}</span>
     </div>
+  );
+
+  return (
+    <Tooltip>
+      <TooltipTrigger asChild>
+        {bar}
+      </TooltipTrigger>
+      <TooltipContent>
+        {label}
+      </TooltipContent>
+    </Tooltip>
   );
 }
 

@@ -2,7 +2,7 @@
 
 import { useMemo } from "react";
 import { MONTH_NAMES, DAY_LABELS } from "@/lib/date-utils";
-import { Holiday, HolidayMap } from "@/lib/types";
+import { Holiday, HolidayMap, HolidayType } from "@/lib/types";
 import { computeMonthLayout } from "@/lib/event-layout";
 import WeekRow from "./WeekRow";
 
@@ -12,6 +12,7 @@ interface MonthGridProps {
   holidayMap: HolidayMap;
   today: string;
   onDayClick: (dateStr: string, holidays: Holiday[]) => void;
+  onEventClick: (name: string, type: HolidayType, userName: string | null) => void;
 }
 
 export default function MonthGrid({
@@ -20,6 +21,7 @@ export default function MonthGrid({
   holidayMap,
   today,
   onDayClick,
+  onEventClick,
 }: MonthGridProps) {
   const layout = useMemo(
     () => computeMonthLayout(year, month, holidayMap, today),
@@ -46,7 +48,7 @@ export default function MonthGrid({
       <div className="border-t border-gray-200">
         {layout.weeks.map((week, i) => (
           <div key={i} className="border-b border-gray-100">
-            <WeekRow week={week} onDayClick={onDayClick} />
+            <WeekRow week={week} onDayClick={onDayClick} onEventClick={onEventClick} />
           </div>
         ))}
       </div>

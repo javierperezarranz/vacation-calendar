@@ -1,7 +1,12 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { X } from "lucide-react";
 import { User } from "@/lib/types";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Label } from "@/components/ui/label";
 
 interface UserSelectorProps {
   users: string[];
@@ -52,10 +57,10 @@ export default function UserSelector({
   return (
     <div className="flex flex-col gap-2">
       <div className="flex items-center gap-2">
-        <label htmlFor="user-name" className="text-sm font-medium text-gray-600">
+        <Label htmlFor="user-name" className="text-gray-600">
           Users:
-        </label>
-        <input
+        </Label>
+        <Input
           id="user-name"
           type="text"
           list="user-list"
@@ -63,16 +68,16 @@ export default function UserSelector({
           onChange={(e) => setInput(e.target.value)}
           onKeyDown={handleKeyDown}
           placeholder="Enter a name"
-          className="border border-gray-300 rounded px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+          className="h-8 w-auto"
         />
-        <button
+        <Button
           type="button"
+          size="sm"
           onClick={addUser}
           disabled={!input.trim()}
-          className="px-3 py-1.5 text-sm rounded bg-indigo-600 text-white hover:bg-indigo-700 disabled:opacity-50 cursor-pointer"
         >
           Add
-        </button>
+        </Button>
         <datalist id="user-list">
           {suggestions.map((u) => (
             <option key={u.id} value={u.name} />
@@ -82,20 +87,21 @@ export default function UserSelector({
       {users.length > 0 && (
         <div className="flex flex-wrap gap-1.5">
           {users.map((name) => (
-            <span
+            <Badge
               key={name}
-              className="inline-flex items-center gap-1 bg-indigo-100 text-indigo-800 text-sm px-2.5 py-0.5 rounded-full"
+              variant="secondary"
+              className="gap-1"
             >
               {name}
               <button
                 type="button"
                 onClick={() => removeUser(name)}
-                className="text-indigo-500 hover:text-indigo-700 cursor-pointer leading-none"
+                className="text-muted-foreground hover:text-foreground cursor-pointer leading-none"
                 aria-label={`Remove ${name}`}
               >
-                &times;
+                <X className="size-3" />
               </button>
-            </span>
+            </Badge>
           ))}
         </div>
       )}

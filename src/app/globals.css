@@ -1,10 +1,174 @@
 @import "tailwindcss";
+@import "tw-animate-css";
 
-@theme inline {
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+/* ─── Mabry Pro font family ─────────────────────────────────── */
+@font-face {
+  font-family: "Mabry Pro";
+  src: url("/fonts/MabryPro-Regular.woff2") format("woff2");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Mabry Pro";
+  src: url("/fonts/MabryPro-Medium.woff2") format("woff2");
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Mabry Pro";
+  src: url("/fonts/MabryPro-Bold.woff2") format("woff2");
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
 }
 
-body {
-  font-family: Arial, Helvetica, sans-serif;
+/* ─── Reckless Neue font family ─────────────────────────────── */
+@font-face {
+  font-family: "Reckless Neue";
+  src: url("/fonts/RecklessNeue-Light.woff2") format("woff2");
+  font-weight: 300;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Reckless Neue";
+  src: url("/fonts/RecklessNeue-Regular.woff2") format("woff2");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* ─── Semantic color tokens ─────────────────────────────────── */
+:root {
+  --background: 0 0% 100%;
+  --foreground: 0 0% 17.6%;
+  --card: 0 0% 100%;
+  --card-foreground: 0 0% 17.6%;
+  --popover: 0 0% 100%;
+  --popover-foreground: 0 0% 17.6%;
+  --primary: 213 65% 39%;
+  --primary-foreground: 0 0% 100%;
+  --secondary: 210 40% 96.1%;
+  --secondary-foreground: 222.2 47.4% 11.2%;
+  --muted: 210 40% 96.1%;
+  --muted-foreground: 215 16% 47%;
+  --accent: 210 40% 96.1%;
+  --accent-foreground: 222.2 47.4% 11.2%;
+  --destructive: 0 84.2% 60.2%;
+  --destructive-foreground: 0 0% 100%;
+  --border: 214 32% 91%;
+  --input: 214 32% 91%;
+  --ring: 213 65% 39%;
+  --radius: 0.5rem;
+}
+
+/* ─── Tailwind v4 theme extension ───────────────────────────── */
+@theme inline {
+  --font-mabry: "Mabry Pro", system-ui, sans-serif;
+  --font-reckless: "Reckless Neue", Georgia, serif;
+
+  /* Brand scale */
+  --color-brand-25: #F5F8FC;
+  --color-brand-50: #EBF1FA;
+  --color-brand-100: #D6E3F4;
+  --color-brand-200: #ADC8E9;
+  --color-brand-300: #84ADDD;
+  --color-brand-400: #5B91D1;
+  --color-brand-500: #3577BF;
+  --color-brand-600: #235CA3;
+  --color-brand-700: #1C4B86;
+  --color-brand-800: #153A69;
+  --color-brand-900: #0E294C;
+
+  /* Gray scale */
+  --color-gray-25: #FCFCFD;
+  --color-gray-50: #F9FAFB;
+  --color-gray-100: #F2F4F7;
+  --color-gray-200: #EAECF0;
+  --color-gray-300: #D0D5DD;
+  --color-gray-400: #98A2B3;
+  --color-gray-500: #667085;
+  --color-gray-600: #475467;
+  --color-gray-700: #344054;
+  --color-gray-800: #1D2939;
+  --color-gray-900: #101828;
+
+  /* Error scale */
+  --color-error-25: #FFFBFA;
+  --color-error-50: #FEF3F2;
+  --color-error-100: #FEE4E2;
+  --color-error-200: #FECDCA;
+  --color-error-300: #FDA29B;
+  --color-error-400: #F97066;
+  --color-error-500: #F04438;
+  --color-error-600: #D92D20;
+  --color-error-700: #B42318;
+  --color-error-800: #912018;
+  --color-error-900: #7A271A;
+
+  /* Warning scale */
+  --color-warning-25: #FFFCF5;
+  --color-warning-50: #FFFAEB;
+  --color-warning-100: #FEF0C7;
+  --color-warning-200: #FEDF89;
+  --color-warning-300: #FEC84B;
+  --color-warning-400: #FDB022;
+  --color-warning-500: #F79009;
+  --color-warning-600: #DC6803;
+  --color-warning-700: #B54708;
+  --color-warning-800: #93370D;
+  --color-warning-900: #7A2E0E;
+
+  /* Success scale */
+  --color-success-25: #F6FEF9;
+  --color-success-50: #ECFDF3;
+  --color-success-100: #D1FADF;
+  --color-success-200: #A6F4C5;
+  --color-success-300: #6CE9A6;
+  --color-success-400: #32D583;
+  --color-success-500: #12B76A;
+  --color-success-600: #039855;
+  --color-success-700: #027A48;
+  --color-success-800: #05603A;
+  --color-success-900: #054F31;
+
+  /* Semantic color mappings (from CSS variables) */
+  --color-background: hsl(var(--background));
+  --color-foreground: hsl(var(--foreground));
+  --color-card: hsl(var(--card));
+  --color-card-foreground: hsl(var(--card-foreground));
+  --color-popover: hsl(var(--popover));
+  --color-popover-foreground: hsl(var(--popover-foreground));
+  --color-primary: hsl(var(--primary));
+  --color-primary-foreground: hsl(var(--primary-foreground));
+  --color-secondary: hsl(var(--secondary));
+  --color-secondary-foreground: hsl(var(--secondary-foreground));
+  --color-muted: hsl(var(--muted));
+  --color-muted-foreground: hsl(var(--muted-foreground));
+  --color-accent: hsl(var(--accent));
+  --color-accent-foreground: hsl(var(--accent-foreground));
+  --color-destructive: hsl(var(--destructive));
+  --color-destructive-foreground: hsl(var(--destructive-foreground));
+  --color-border: hsl(var(--border));
+  --color-input: hsl(var(--input));
+  --color-ring: hsl(var(--ring));
+
+  /* Border radius tokens */
+  --radius-lg: var(--radius);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-sm: calc(var(--radius) - 4px);
+}
+
+/* ─── Base layer ────────────────────────────────────────────── */
+@layer base {
+  * {
+    border-color: var(--color-border);
+  }
+  body {
+    font-family: var(--font-mabry);
+    background-color: var(--color-background);
+    color: var(--color-foreground);
+  }
 }

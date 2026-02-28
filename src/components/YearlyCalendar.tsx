@@ -1,6 +1,6 @@
 "use client";
 
-import { Holiday, HolidayMap } from "@/lib/types";
+import { Holiday, HolidayMap, HolidayType } from "@/lib/types";
 import MonthGrid from "./MonthGrid";
 
 interface YearlyCalendarProps {
@@ -8,6 +8,7 @@ interface YearlyCalendarProps {
   holidayMap: HolidayMap;
   today: string;
   onDayClick: (dateStr: string, holidays: Holiday[]) => void;
+  onEventClick: (name: string, type: HolidayType, userName: string | null) => void;
 }
 
 export default function YearlyCalendar({
@@ -15,6 +16,7 @@ export default function YearlyCalendar({
   holidayMap,
   today,
   onDayClick,
+  onEventClick,
 }: YearlyCalendarProps) {
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
@@ -26,6 +28,7 @@ export default function YearlyCalendar({
           holidayMap={holidayMap}
           today={today}
           onDayClick={onDayClick}
+          onEventClick={onEventClick}
         />
       ))}
     </div>

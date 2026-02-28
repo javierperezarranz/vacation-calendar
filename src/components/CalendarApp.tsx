@@ -1,15 +1,18 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Holiday, HolidayType } from "@/lib/types";
+import { Holiday, HolidayType, UpdateHolidayGroupRequest } from "@/lib/types";
 import { formatDate } from "@/lib/date-utils";
 import { useHolidays } from "@/hooks/useHolidays";
+import { TooltipProvider } from "@/components/ui/tooltip";
+import { Spinner } from "@/components/ui/spinner";
 import YearNavigation from "./YearNavigation";
 import UserSelector from "./UserSelector";
 import PtoCounter from "./PtoCounter";
 import HolidayLegend from "./HolidayLegend";
 import YearlyCalendar from "./YearlyCalendar";
 import AddEventModal from "./AddEventModal";
+import EditEventModal from "./EditEventModal";
 
 export default function CalendarApp() {
   const now = new Date();
@@ -34,11 +37,21 @@ export default function CalendarApp() {
     holidays: Holiday[];
   } | null>(null);
 
-  const { holidayMap, ptoCounts, loading, addHoliday, removeHoliday } =
+  const [editModalState, setEditModalState] = useState<{
+    name: string;
+    type: HolidayType;
+    userName: string | null;
+  } | null>(null);
+
+  const { holidayMap, ptoCounts, loading, addHoliday, removeHoliday, updateHolidayGroup, removeHolidayGroup } =
     useHolidays(year);
 
   const handleDayClick = (dateStr: string, holidays: Holiday[]) => {
     setModalState({ dateStr, holidays });
+  };
+
+  const handleEventClick = (name: string, type: HolidayType, userName: string | null) => {
+    setEditModalState({ name, type, userName });
   };
 
   const handleAdd = async (
@@ -54,41 +67,66 @@ export default function CalendarApp() {
     await removeHoliday(id);
   };
 
+  const handleUpdate = async (req: UpdateHolidayGroupRequest) => {
+    await updateHolidayGroup(req);
+  };
+
+  const handleDeleteGroup = async (name: string, type: string, userName: string | null) => {
+    await removeHolidayGroup(name, type, userName);
+  };
+
   return (
-    <div className="max-w-7xl mx-auto px-4 py-6">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
-        <YearNavigation year={year} onYearChange={setYear} />
-        <div className="flex flex-col sm:flex-row sm:items-center gap-3">
-          <UserSelector users={users} onUsersChange={setUsers} />
-          <PtoCounter users={users} ptoCounts={ptoCounts} />
+    <TooltipProvider>
+      <div className="max-w-7xl mx-auto px-4 py-6">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+          <YearNavigation year={year} onYearChange={setYear} />
+          <div className="flex flex-col sm:flex-row sm:items-center gap-3">
+            <UserSelector users={users} onUsersChange={setUsers} />
+            <PtoCounter users={users} ptoCounts={ptoCounts} />
+          </div>
         </div>
+
+        <div className="mb-4">
+          <HolidayLegend />
+        </div>
+
+        {loading ? (
+          <div className="flex items-center justify-center py-12">
+            <Spinner className="size-8 text-brand-600" />
+          </div>
+        ) : (
+          <YearlyCalendar
+            year={year}
+            holidayMap={holidayMap}
+            today={todayStr}
+            onDayClick={handleDayClick}
+            onEventClick={handleEventClick}
+          />
+        )}
+
+        {modalState && (
+          <AddEventModal
+            dateStr={modalState.dateStr}
+            existingHolidays={modalState.holidays}
+            users={users}
+            onAdd={handleAdd}
+            onDelete={handleDelete}
+            onClose={() => setModalState(null)}
+          />
+        )}
+
+        {editModalState && (
+          <EditEventModal
+            year={year}
+            eventName={editModalState.name}
+            eventType={editModalState.type}
+            userName={editModalState.userName}
+            onUpdate={handleUpdate}
+            onDelete={handleDeleteGroup}
+            onClose={() => setEditModalState(null)}
+          />
+        )}
       </div>
-
-      <div className="mb-4">
-        <HolidayLegend />
-      </div>
-
-      {loading ? (
-        <div className="text-center text-gray-400 py-12">Loading...</div>
-      ) : (
-        <YearlyCalendar
-          year={year}
-          holidayMap={holidayMap}
-          today={todayStr}
-          onDayClick={handleDayClick}
-        />
-      )}
-
-      {modalState && (
-        <AddEventModal
-          dateStr={modalState.dateStr}
-          existingHolidays={modalState.holidays}
-          users={users}
-          onAdd={handleAdd}
-          onDelete={handleDelete}
-          onClose={() => setModalState(null)}
-        />
-      )}
-    </div>
+    </TooltipProvider>
   );
 }

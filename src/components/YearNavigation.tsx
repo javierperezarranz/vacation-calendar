@@ -1,5 +1,8 @@
 "use client";
 
+import { ChevronLeft, ChevronRight } from "lucide-react";
+import { Button } from "@/components/ui/button";
+
 interface YearNavigationProps {
   year: number;
   onYearChange: (year: number) => void;
@@ -11,23 +14,25 @@ export default function YearNavigation({
 }: YearNavigationProps) {
   return (
     <div className="flex items-center gap-4">
-      <button
+      <Button
+        variant="ghost"
+        size="icon"
         onClick={() => onYearChange(year - 1)}
-        className="px-3 py-1 text-lg rounded hover:bg-gray-100 transition-colors cursor-pointer"
         aria-label="Previous year"
       >
-        &lt;
-      </button>
-      <span className="text-2xl font-bold tabular-nums min-w-[5ch] text-center">
+        <ChevronLeft className="size-5" />
+      </Button>
+      <span className="font-reckless font-light tracking-tight text-3xl tabular-nums min-w-[5ch] text-center">
         {year}
       </span>
-      <button
+      <Button
+        variant="ghost"
+        size="icon"
         onClick={() => onYearChange(year + 1)}
-        className="px-3 py-1 text-lg rounded hover:bg-gray-100 transition-colors cursor-pointer"
         aria-label="Next year"
       >
-        &gt;
-      </button>
+        <ChevronRight className="size-5" />
+      </Button>
     </div>
   );
 }

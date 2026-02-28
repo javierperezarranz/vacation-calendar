@@ -1,6 +1,6 @@
 "use client";
 
-import { WeekRowLayout, Holiday, DayCellData } from "@/lib/types";
+import { WeekRowLayout, Holiday, HolidayType, DayCellData } from "@/lib/types";
 import DayCell from "./DayCell";
 import EventBar, { DAY_HEADER_HEIGHT, SLOT_HEIGHT, SLOT_GAP } from "./EventBar";
 
@@ -14,9 +14,10 @@ function dayNumberColor(cell: DayCellData): string {
 interface WeekRowProps {
   week: WeekRowLayout;
   onDayClick: (dateStr: string, holidays: Holiday[]) => void;
+  onEventClick: (name: string, type: HolidayType, userName: string | null) => void;
 }
 
-export default function WeekRow({ week, onDayClick }: WeekRowProps) {
+export default function WeekRow({ week, onDayClick, onEventClick }: WeekRowProps) {
   const eventAreaHeight =
     week.slotCount > 0
       ? week.slotCount * (SLOT_HEIGHT + SLOT_GAP)
@@ -33,7 +34,7 @@ export default function WeekRow({ week, onDayClick }: WeekRowProps) {
       </div>
       {/* Event bar overlay */}
       {week.segments.map((segment, i) => (
-        <EventBar key={i} segment={segment} />
+        <EventBar key={i} segment={segment} onEventClick={onEventClick} />
       ))}
       {/* Day number labels - always visible above events */}
       <div className="absolute inset-x-0 top-0 grid grid-cols-7 pointer-events-none z-10">

@@ -3,6 +3,16 @@
 import { useState } from "react";
 import { Holiday, HolidayType } from "@/lib/types";
 import { getDateRange } from "@/lib/date-utils";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Button } from "@/components/ui/button";
 
 interface AddEventModalProps {
   dateStr: string;
@@ -67,38 +77,39 @@ export default function AddEventModal({
   };
 
   return (
-    <div
-      className="fixed inset-0 bg-black/40 flex items-center justify-center z-50"
-      onClick={(e) => e.target === e.currentTarget && onClose()}
-    >
-      <div className="bg-white rounded-xl shadow-xl p-6 w-full max-w-md mx-4">
-        <h2 className="text-lg font-semibold mb-4">{dateStr}</h2>
+    <Dialog open onOpenChange={(open) => !open && onClose()}>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>{dateStr}</DialogTitle>
+        </DialogHeader>
 
         {existingHolidays.length > 0 && (
-          <div className="mb-4">
-            <h3 className="text-sm font-medium text-gray-500 mb-2">
+          <div>
+            <h3 className="text-sm font-medium text-muted-foreground mb-2">
               Existing events
             </h3>
             <ul className="space-y-1">
               {existingHolidays.map((h) => (
                 <li
                   key={h.id}
-                  className="flex items-center justify-between text-sm bg-gray-50 rounded px-3 py-1.5"
+                  className="flex items-center justify-between text-sm bg-muted rounded px-3 py-1.5"
                 >
                   <span>
                     {h.name}{" "}
-                    <span className="text-gray-400">
+                    <span className="text-muted-foreground">
                       ({h.type}
                       {h.user_name ? `, ${h.user_name}` : ""})
                     </span>
                   </span>
-                  <button
+                  <Button
+                    variant="ghost"
+                    size="xs"
                     onClick={() => handleDelete(h.id)}
                     disabled={submitting}
-                    className="text-red-500 hover:text-red-700 text-xs font-medium cursor-pointer"
+                    className="text-destructive hover:text-destructive"
                   >
                     Delete
-                  </button>
+                  </Button>
                 </li>
               ))}
             </ul>
@@ -106,29 +117,24 @@ export default function AddEventModal({
         )}
 
         {users.length === 0 ? (
-          <p className="text-sm text-amber-600 mb-4">
+          <p className="text-sm text-warning-600">
             Please add at least one user above to add events.
           </p>
         ) : (
           <form onSubmit={handleSubmit} className="space-y-3">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Event name
-              </label>
-              <input
+              <Label className="mb-1">Event name</Label>
+              <Input
                 type="text"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 placeholder="e.g., Summer vacation"
-                className="w-full border border-gray-300 rounded px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
                 autoFocus
               />
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Type
-              </label>
+              <Label className="mb-1">Type</Label>
               <div className="flex gap-4">
                 {(["national", "company", "pto", "event"] as HolidayType[]).map((t) => (
                   <label key={t} className="flex items-center gap-1.5 text-sm">
@@ -148,9 +154,7 @@ export default function AddEventModal({
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Assign to
-              </label>
+              <Label className="mb-1">Assign to</Label>
               <div className="flex flex-wrap gap-x-4 gap-y-1">
                 {users.map((user) => (
                   <label key={user} className="flex items-center gap-1.5 text-sm">
@@ -164,42 +168,39 @@ export default function AddEventModal({
                 ))}
               </div>
               {selectedUsers.length === 0 && (
-                <p className="text-xs text-red-500 mt-1">Select at least one user</p>
+                <p className="text-xs text-destructive mt-1">Select at least one user</p>
               )}
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                End date (optional, for multi-day)
-              </label>
-              <input
+              <Label className="mb-1">End date (optional, for multi-day)</Label>
+              <Input
                 type="date"
                 value={endDate}
                 onChange={(e) => setEndDate(e.target.value)}
                 min={dateStr}
-                className="border border-gray-300 rounded px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                className="w-auto"
               />
             </div>
 
-            <div className="flex justify-end gap-2 pt-2">
-              <button
+            <DialogFooter>
+              <Button
                 type="button"
+                variant="outline"
                 onClick={onClose}
-                className="px-4 py-1.5 text-sm rounded border border-gray-300 hover:bg-gray-50 cursor-pointer"
               >
                 Cancel
-              </button>
-              <button
+              </Button>
+              <Button
                 type="submit"
                 disabled={submitting || !name.trim() || selectedUsers.length === 0}
-                className="px-4 py-1.5 text-sm rounded bg-indigo-600 text-white hover:bg-indigo-700 disabled:opacity-50 cursor-pointer"
               >
-                {submitting ? "Adding..." : "Add Event"}
-              </button>
-            </div>
+                {submitting ? "Adding..." : "Add event"}
+              </Button>
+            </DialogFooter>
           </form>
         )}
-      </div>
-    </div>
+      </DialogContent>
+    </Dialog>
   );
 }
