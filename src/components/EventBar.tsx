@@ -9,9 +9,16 @@ import {
 
 const TYPE_COLORS: Record<HolidayType, string> = {
   national: "bg-gray-400",
-  company: "bg-brand-400 text-white",
-  pto: "bg-success-400 text-white",
-  event: "bg-warning-400 text-white",
+  company: "bg-success-400/75 text-gray-950",
+  pto: "bg-brand-200 text-gray-950",
+  event: "bg-warning-400/75 text-gray-950",
+};
+
+const TOOLTIP_COLORS: Record<HolidayType, string> = {
+  national: "bg-gray-400 text-white border-gray-400",
+  company: "bg-success-400 text-gray-950 border-success-400",
+  pto: "bg-brand-200 text-gray-950 border-brand-200",
+  event: "bg-warning-400 text-gray-950 border-warning-400",
 };
 
 const DAY_HEADER_HEIGHT = 32; // px - space for day number + national holiday label
@@ -34,6 +41,7 @@ export default function EventBar({ segment, onEventClick }: EventBarProps) {
   ].join(" ");
 
   const colorClass = TYPE_COLORS[segment.type] || TYPE_COLORS.pto;
+  const tooltipColorClass = TOOLTIP_COLORS[segment.type] || TOOLTIP_COLORS.pto;
 
   const label =
     segment.userName
@@ -74,7 +82,7 @@ export default function EventBar({ segment, onEventClick }: EventBarProps) {
       <TooltipTrigger asChild>
         {bar}
       </TooltipTrigger>
-      <TooltipContent>
+      <TooltipContent className={tooltipColorClass}>
         {label}
       </TooltipContent>
     </Tooltip>

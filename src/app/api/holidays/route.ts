@@ -20,7 +20,9 @@ export async function GET(request: NextRequest) {
   const holidays = getHolidaysForYear(year);
   const ptoCounts = getPtoCountsForYear(year);
 
-  return NextResponse.json({ holidays, ptoCounts });
+  return NextResponse.json({ holidays, ptoCounts }, {
+    headers: { "Cache-Control": "no-store" },
+  });
 }
 
 export async function POST(request: NextRequest) {

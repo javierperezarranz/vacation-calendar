@@ -70,7 +70,7 @@ export default function UserSelector({
           <button
             type="button"
             onClick={() => removeUser(name)}
-            className="ml-0.5 rounded-full p-0.5 text-muted-foreground hover:bg-gray-200 hover:text-foreground cursor-pointer transition-colors"
+            className="ml-0.5 rounded-full p-0.5 text-muted-foreground hover:bg-gray-200 dark:hover:bg-gray-600 hover:text-foreground cursor-pointer transition-colors"
             aria-label={`Remove ${name}`}
           >
             <X className="size-3" />

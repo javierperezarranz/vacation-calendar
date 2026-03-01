@@ -5,10 +5,10 @@ import DayCell from "./DayCell";
 import EventBar, { DAY_HEADER_HEIGHT, SLOT_HEIGHT, SLOT_GAP } from "./EventBar";
 
 function dayNumberColor(cell: DayCellData): string {
-  if (cell.isToday) return "text-indigo-600";
-  if (cell.nationalHolidayName) return "text-red-700";
-  if (cell.isWeekend) return "text-gray-400";
-  return "text-gray-700";
+  if (cell.isToday) return "text-indigo-600 dark:text-indigo-400";
+  if (cell.nationalHolidayName) return "text-red-700 dark:text-red-400";
+  if (cell.isWeekend) return "text-gray-400 dark:text-gray-500";
+  return "text-gray-700 dark:text-gray-300";
 }
 
 interface WeekRowProps {

@@ -1,6 +1,11 @@
 "use client";
 
 import { DayCellData, Holiday } from "@/lib/types";
+import {
+  Tooltip,
+  TooltipTrigger,
+  TooltipContent,
+} from "@/components/ui/tooltip";
 
 interface DayCellProps {
   cell: DayCellData;
@@ -13,10 +18,10 @@ export default function DayCell({ cell, onClick }: DayCellProps) {
   }
 
   const bgColor = cell.nationalHolidayName
-    ? "bg-red-50"
+    ? "bg-red-50 dark:bg-red-950/40"
     : cell.isWeekend
-      ? "bg-gray-50"
-      : "bg-white";
+      ? "bg-gray-50 dark:bg-gray-800/50"
+      : "bg-white dark:bg-gray-900";
 
   return (
     <button
@@ -24,9 +29,9 @@ export default function DayCell({ cell, onClick }: DayCellProps) {
       className={`
         relative w-full text-left px-1 pt-0.5 min-h-[32px]
         transition-colors cursor-pointer
-        hover:bg-gray-100
+        hover:bg-gray-100 dark:hover:bg-gray-700
         ${bgColor}
-        ${cell.isToday ? "ring-2 ring-inset ring-indigo-600" : ""}
+        ${cell.isToday ? "ring-2 ring-inset ring-indigo-600 dark:ring-indigo-400" : ""}
       `}
       title={
         cell.holidays.length
@@ -39,15 +44,21 @@ export default function DayCell({ cell, onClick }: DayCellProps) {
         {cell.day}
       </span>
       {cell.nationalHolidayName && (
-        <div
-          className="text-[8px] leading-tight text-red-600 truncate"
-          title={cell.nationalHolidayName}
-        >
-          {cell.nationalHolidayName}
-        </div>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <div
+              className="text-[8px] leading-tight text-red-600 dark:text-red-400 truncate"
+            >
+              {cell.nationalHolidayName}
+            </div>
+          </TooltipTrigger>
+          <TooltipContent className="bg-gray-400 text-white border-gray-400">
+            {cell.nationalHolidayName}
+          </TooltipContent>
+        </Tooltip>
       )}
       {cell.overflowCount > 0 && (
-        <div className="absolute bottom-0 left-0 right-0 text-center text-[8px] text-gray-500 font-medium">
+        <div className="absolute bottom-0 left-0 right-0 text-center text-[8px] text-gray-500 dark:text-gray-400 font-medium">
           +{cell.overflowCount} more
         </div>
       )}

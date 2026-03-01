@@ -29,7 +29,7 @@ export default function MonthGrid({
   );
 
   return (
-    <div className="border border-gray-200 rounded-lg p-3">
+    <div className="border border-gray-200 dark:border-gray-700 rounded-lg p-3">
       <h3 className="text-sm font-semibold text-center mb-2">
         {MONTH_NAMES[month]}
       </h3>
@@ -38,16 +38,16 @@ export default function MonthGrid({
         {DAY_LABELS.map((label) => (
           <div
             key={label}
-            className="text-[10px] text-gray-400 text-center font-medium pb-1"
+            className="text-[10px] text-gray-400 dark:text-gray-500 text-center font-medium pb-1"
           >
             {label}
           </div>
         ))}
       </div>
       {/* Week rows */}
-      <div className="border-t border-gray-200">
+      <div className="border-t border-gray-200 dark:border-gray-700">
         {layout.weeks.map((week, i) => (
-          <div key={i} className="border-b border-gray-100">
+          <div key={i} className="border-b border-gray-100 dark:border-gray-800">
             <WeekRow week={week} onDayClick={onDayClick} onEventClick={onEventClick} />
           </div>
         ))}

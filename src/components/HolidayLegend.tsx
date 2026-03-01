@@ -9,10 +9,10 @@ import {
 const LEGEND_ITEMS = [
   { label: "National holiday", color: "bg-error-50 border border-error-200" },
   { label: "Weekend", color: "bg-gray-50 border border-gray-200" },
-  { label: "Company holiday", color: "bg-brand-400" },
-  { label: "PTO", color: "bg-success-400" },
-  { label: "Event", color: "bg-warning-400" },
-  { label: "Today", color: "ring-2 ring-brand-600" },
+  { label: "Company holiday", color: "bg-success-400 opacity-75" },
+  { label: "PTO", color: "bg-brand-400 opacity-75" },
+  { label: "Event", color: "bg-warning-400 opacity-75" },
+  { label: "Today", color: "ring-2 ring-indigo-600 dark:ring-indigo-400" },
 ];
 
 export default function HolidayLegend() {
@@ -23,11 +23,11 @@ export default function HolidayLegend() {
           <span
             className={`inline-block size-3 rounded-sm ${item.color}`}
           />
-          <span className="font-medium text-gray-600">{item.label}</span>
+          <span className="font-medium text-gray-600 dark:text-gray-300">{item.label}</span>
           {item.label === "PTO" && (
             <Tooltip>
               <TooltipTrigger asChild>
-                <span className="cursor-help text-gray-400 text-xs leading-none">
+                <span className="cursor-help text-gray-400 dark:text-gray-500 text-xs leading-none">
                   &#9432;
                 </span>
               </TooltipTrigger>
